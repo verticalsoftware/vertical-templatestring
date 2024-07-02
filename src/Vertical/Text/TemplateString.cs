@@ -7,6 +7,9 @@ namespace Vertical.Text;
 /// for real values.
 /// </summary>
 public sealed class TemplateString
+#if NET8_0_OR_GREATER
+    : IParsable<TemplateString>
+#endif
 {
     private readonly IReadOnlyCollection<IAppender> _appenders;
 
@@ -55,5 +58,40 @@ public sealed class TemplateString
 
         var parser = new TemplateParser(template, options ?? new TemplateStringOptions());
         return new TemplateString(parser.Build());
+    }
+    
+    /// <summary>
+    /// Parses the given string.
+    /// </summary>
+    /// <param name="str">String to parse.</param>
+    /// <param name="provider">Optional format provider.</param>
+    /// <returns><see cref="TemplateString"/></returns>
+    public static TemplateString Parse(string str, IFormatProvider? provider)
+    {
+        return Create(str);
+    }
+    
+    /// <summary>
+    /// Tries to parse the given string.
+    /// </summary>
+    /// <param name="str">String to parse.</param>
+    /// <param name="provider">Optional format provider</param>
+    /// <param name="obj">If successful, a reference to the created instance</param>
+    /// <returns><c>true</c> if the operation was successful</returns>
+    public static bool TryParse(string? str, IFormatProvider? provider, out TemplateString obj)
+    {
+        obj = default!;
+        if (string.IsNullOrWhiteSpace(str))
+            return false;
+
+        try
+        {
+            obj = Create(str);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
